@@ -12,8 +12,13 @@ var passport = require('passport');
 var flash = require('connect-flash');
 var validator = require('express-validator');
 var MongoStore = require('connect-mongo')(session);
-var index = require('./routes/index');
-var user = require('./routes/user');
+//var index = require('./routes/index');
+//var user = require('./routes/user');
+//send request to routes
+var routes = require('./routes/index');
+var userRoutes = require('./routes/user');
+
+var port = 3000
 var app = express();
 var url = 'mongodb://yashjeet:Mongo123@cluster0-shard-00-00-y1niv.mongodb.net:27017,cluster0-shard-00-01-y1niv.mongodb.net:27017,cluster0-shard-00-02-y1niv.mongodb.net:27017/Db?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin';
 mongoose.connect(url,{useMongoClient:true});
@@ -64,6 +69,7 @@ app.use(session({
   store: new MongoStore({ mongooseConnection: mongoose.connection }),
   cookie: { maxAge: 180 * 60 * 1000 }
 }));
+//initialize passport and session to store the users
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -75,8 +81,10 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.use('/', user);
-app.use('/', index);
+app.use('/user',userRoutes);
+app.use('/',routes);
+//app.use('/', user);
+//app.use('/', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -97,6 +105,11 @@ if (app.get('env') === 'development') {
     });
   });
 }
+//start server
+app.listen(port, function(){
+  console.log(`server started on port 3000!`);
+});
+
 
 // Error handling for production environment
 app.use(function(err, req, res, next) {
